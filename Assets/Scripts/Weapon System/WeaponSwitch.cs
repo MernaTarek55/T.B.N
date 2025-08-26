@@ -8,37 +8,49 @@ public class WeaponSwitch : MonoBehaviour
     [SerializeField] private GameObject[] weapons;
     [SerializeField] private PlayerInventoryHolder inventoryHolder;
 
-    [SerializeField] private Button deadeyeButton;
-    [SerializeField] private GameObject SwitchBTN;
+    //[SerializeField] private Button deadeyeButton;
+    //[SerializeField] private GameObject SwitchBTN;
     private List<WeaponType> ownedWeapons;
-    private int currentWeaponIndex = 0; 
+    private int currentWeaponIndex = 0;
     bool activated = false;
+
+    // Add input cooldown to prevent rapid switching
+    private float switchCooldown = 0.3f;
+    private float lastSwitchTime = 0f;
+
     private void Start()
     {
-
-
         inventoryHolder = SaveManager.Singleton.playerInventoryHolder;
-
         ownedWeapons = inventoryHolder.Inventory.inventorySaveData.ownedWeapons;
+
         foreach (var owned in ownedWeapons)
         {
-            Debug.Log($"WhyyyyyyOwned weapon: {owned}");    
+            Debug.Log($"WhyyyyyyOwned weapon: {owned}");
         }
+
         FilterOwnedWeapons();
+
         for (int i = 0; i < weapons.Length; i++)
         {
             if (activated) break;
             ActivateWeaponInStart(i);
-           
         }
-        //ActivateWeapon(currentWeaponIndex);
-        if (ownedWeapons.Count >= 2)
-        {
-            SwitchBTN.SetActive(true);
-        }
+
+        //if (ownedWeapons.Count >= 2)
+        //{
+        //    SwitchBTN.SetActive(true);
+        //}
     }
 
-
+    private void Update()
+    {
+        // Handle right mouse click for weapon switching
+        if (Input.GetMouseButtonDown(1) && Time.time - lastSwitchTime > switchCooldown)
+        {
+            lastSwitchTime = Time.time;
+            SwitchWeapons();
+        }
+    }
 
     private void FilterOwnedWeapons()
     {
@@ -60,6 +72,7 @@ public class WeaponSwitch : MonoBehaviour
             Debug.LogWarning("No owned weapons to switch.");
             return;
         }
+
         do
         {
             currentWeaponIndex = (currentWeaponIndex + 1) % weapons.Length;
@@ -81,9 +94,8 @@ public class WeaponSwitch : MonoBehaviour
             if (weapons[i] != null)
             {
                 bool shouldActivate = i == index && IsWeaponOwned(i);
-                
-                 
-                    weapons[i].SetActive(shouldActivate);
+
+                weapons[i].SetActive(shouldActivate);
                 if (shouldActivate)
                 {
                     var weapon = weapons[i].GetComponent<Weapon>();
@@ -92,15 +104,16 @@ public class WeaponSwitch : MonoBehaviour
             }
         }
 
-        if (GetCurrentWeapon().WeaponType == WeaponType.GrenadeLauncher || ownedWeapons.Count == 0)
-        {
-            deadeyeButton.interactable = false;
-        }
-        else
-        {
-            deadeyeButton.interactable = true;   
-        }
+        //if (GetCurrentWeapon().WeaponType == WeaponType.GrenadeLauncher || ownedWeapons.Count == 0)
+        //{
+        //    deadeyeButton.interactable = false;
+        //}
+        //else
+        //{
+        //    deadeyeButton.interactable = true;
+        //}
     }
+
     private void ActivateWeaponInStart(int index)
     {
         for (int i = 0; i < weapons.Length; i++)
@@ -108,8 +121,7 @@ public class WeaponSwitch : MonoBehaviour
             if (weapons[i] != null)
             {
                 bool shouldActivate = i == index && IsWeaponOwned(i);
-                
-                 
+
                 if (shouldActivate)
                 {
                     var weapon = weapons[i].GetComponent<Weapon>();
@@ -118,19 +130,18 @@ public class WeaponSwitch : MonoBehaviour
                     currentWeaponIndex = i;
                     activated = true;
                     return;
-                    //weapon.ApplyUpgrades(inventoryHolder.Inventory);
                 }
             }
         }
 
-        if (GetCurrentWeapon().WeaponType == WeaponType.GrenadeLauncher || ownedWeapons.Count == 0)
-        {
-            deadeyeButton.interactable = false;
-        }
-        else
-        {
-            deadeyeButton.interactable = true;   
-        }
+        //if (GetCurrentWeapon().WeaponType == WeaponType.GrenadeLauncher || ownedWeapons.Count == 0)
+        //{
+        //    deadeyeButton.interactable = false;
+        //}
+        //else
+        //{
+        //    deadeyeButton.interactable = true;
+        //}
     }
 
     public Weapon GetCurrentWeapon()
@@ -161,18 +172,17 @@ public class WeaponSwitch : MonoBehaviour
         Weapon currentWeapon = GetCurrentWeapon();
         if (currentWeapon == null) return;
 
-        // Call a generic Shoot method implemented in each weapon type
         currentWeapon.ShootFromAnimation();
     }
+
     public void OnWeaponPurchased(WeaponType weaponType)
     {
-        // Refresh owned weapons list
         ownedWeapons = inventoryHolder.Inventory.inventorySaveData.ownedWeapons;
-        if(ownedWeapons.Count >= 2)
-        {
-            SwitchBTN.SetActive(true);
-        }
-        // If this was the first weapon purchased, activate it
+        //if (ownedWeapons.Count >= 2)
+        //{
+        //    SwitchBTN.SetActive(true);
+        //}
+
         if (ownedWeapons.Count == 1)
         {
             for (int i = 0; i < weapons.Length; i++)

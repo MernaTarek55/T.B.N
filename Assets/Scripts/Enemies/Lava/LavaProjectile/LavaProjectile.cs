@@ -72,7 +72,7 @@ public class LavaProjectile : MonoBehaviour
         // First check if quadraticCurve is assigned
         if (quadraticCurve == null)
         {
-            Debug.LogError("LavaProjectile: quadraticCurve is null! Make sure to call SetQuadraticCurve() before activating.");
+            Debug.Log("LavaProjectile: quadraticCurve is null! Make sure to call SetQuadraticCurve() before activating.");
             return false;
         }
 
@@ -81,25 +81,25 @@ public class LavaProjectile : MonoBehaviour
         // Check all required components
         if (curve == null)
         {
-            Debug.LogError("LavaProjectile: Missing QuadraticCurve reference!");
+            Debug.Log("LavaProjectile: Missing QuadraticCurve reference!");
             return false;
         }
 
         if (curve.A == null)
         {
-            Debug.LogError("LavaProjectile: Missing QuadraticCurve point A!");
+            Debug.Log("LavaProjectile: Missing QuadraticCurve point A!");
             return false;
         }
 
         if (curve.B == null)
         {
-            Debug.LogError("LavaProjectile: Missing QuadraticCurve point B!");
+            Debug.Log("LavaProjectile: Missing QuadraticCurve point B!");
             return false;
         }
 
         if (curve.Control == null)
         {
-            Debug.LogError("LavaProjectile: Missing QuadraticCurve control point!");
+            Debug.Log("LavaProjectile: Missing QuadraticCurve control point!");
             return false;
         }
 

@@ -18,7 +18,7 @@ public class DeadeyeSkill : MonoBehaviour
     // public variables
     public bool canShoot = true;
 
-    // private IMPORTANT vriables
+    // private IMPORTANT variables
     private List<Transform> markedTargets = new List<Transform>();
     private PlayerInventory playerInventory;
     private bool isExcutingTargets;
@@ -32,8 +32,7 @@ public class DeadeyeSkill : MonoBehaviour
     private float lastUsedTime;
 
     public event Action OnDeadeyeEffectEnded;
-    
-    
+
     private void Start()
     {
         GameObject player = GameObject.FindWithTag("Player");
@@ -50,6 +49,12 @@ public class DeadeyeSkill : MonoBehaviour
 
     private void Update()
     {
+        // Handle Q key for Dead Eye activation
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            UseDeadeye();
+        }
+
         if (Time.time - lastUsedTime >= cooldownTime)
         {
             isExcutingTargets = false;
@@ -65,10 +70,11 @@ public class DeadeyeSkill : MonoBehaviour
             timer += Time.unscaledDeltaTime;
             UpdateCooldownUI(1 - (timer / duration));
 
-            if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+            // Replace touch input with mouse input
+            if (Input.GetMouseButtonDown(0)) // Left mouse button
             {
-                Vector2 touchPos = Input.GetTouch(0).position;
-                AddTapPosition(touchPos);
+                Vector2 mousePos = Input.mousePosition;
+                AddTapPosition(mousePos);
             }
         }
         else if (!isUsingAbility && doneWithLastTargets && !isExcutingTargets && markedTargets.Count > 0)
@@ -143,26 +149,21 @@ public class DeadeyeSkill : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit))
         {
-            //if (hit.collider.CompareTag("Enemy"))
-            //{
-                GameObject tap = new GameObject("TargetMarker");
-                tap.transform.position = hit.point;
-                tap.transform.parent = hit.collider.transform;
-                markedTargets.Add(tap.transform);
+            GameObject tap = new GameObject("TargetMarker");
+            tap.transform.position = hit.point;
+            tap.transform.parent = hit.collider.transform;
+            markedTargets.Add(tap.transform);
 
-                GameObject tmpImage = new GameObject("TargetImage");
-                tmpImage.transform.position = hit.point;
-                tmpImage.transform.parent = hit.transform;
-            //}
+            GameObject tmpImage = new GameObject("TargetImage");
+            tmpImage.transform.position = hit.point;
+            tmpImage.transform.parent = hit.transform;
         }
         else
         {
-            // Optional: if you want to create a fallback marker in empty space
             GameObject tap = new GameObject("TargetMarker");
             tap.transform.position = ray.origin + ray.direction * 100f;
         }
     }
-
 
     private void UpdateTargetsImages()
     {
@@ -196,7 +197,7 @@ public class DeadeyeSkill : MonoBehaviour
     private void TerminateEnemies()
     {
         Weapon weapon = currentWeapon.GetCurrentWeapon();
-        if (weapon == null) 
+        if (weapon == null)
         {
             return;
         }
@@ -209,12 +210,12 @@ public class DeadeyeSkill : MonoBehaviour
     {
         doneWithLastTargets = false;
 
-        for (int i = 0; i < markedTargets.Count; i++) 
+        for (int i = 0; i < markedTargets.Count; i++)
         {
             if (markedTargets[i] == null) continue;
 
             yield return StartCoroutine(weapon.ShootForDeadEye(markedTargets[i].position));
-            yield return new WaitForSeconds(1f); 
+            yield return new WaitForSeconds(1f);
             targetsImages[i].gameObject.SetActive(false);
             Debug.Log("ana hena");
         }
@@ -225,6 +226,5 @@ public class DeadeyeSkill : MonoBehaviour
         markedTargets.Clear();
         UpdateTargetsImages();
         isExcutingTargets = false;
-
     }
-} 
+}

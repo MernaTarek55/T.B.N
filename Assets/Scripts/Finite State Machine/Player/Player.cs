@@ -50,9 +50,9 @@ public class Player : MonoBehaviour
 
     [SerializeField] GameObject pistol;
     [Header("Invisibility Settings")]
-    [SerializeField] GameObject invisibilityBtn;
+    //[SerializeField] GameObject invisibilityBtn;
     [Header("DeadEye Settings")]
-    [SerializeField] GameObject DeadEyeBtn;
+    //[SerializeField] GameObject DeadEyeBtn;
     [Header("Movement Settings")]
     public float acceleration = 10f;
     public float deceleration = 15f;
@@ -132,12 +132,12 @@ public class Player : MonoBehaviour
     public void ActivateInvisibility()
     {
         GetComponent<InvisibilitySkill>().enabled = true;
-        invisibilityBtn.SetActive(true);
+        //invisibilityBtn.SetActive(true);
     }
 
     public void ActivateDeadEye()
     {
-        DeadEyeBtn.SetActive(true);
+        //DeadEyeBtn.SetActive(true);
     }
 
     public void ActivatePistol()

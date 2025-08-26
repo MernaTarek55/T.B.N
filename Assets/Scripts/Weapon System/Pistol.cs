@@ -17,10 +17,10 @@ public class Pistol : Weapon
 
     [Header("Effects")]
     [SerializeField] private ParticleSystem muzzleFlash;
-    //better in parent??
     [SerializeField] private AudioClip shootSound;
     [SerializeField] private AudioClip reloadSound;
     [SerializeField] private AudioSource audioSource;
+
     [Header("Rig")]
     [SerializeField] private Transform Spher;
     [SerializeField] private Rig rig;
@@ -30,8 +30,6 @@ public class Pistol : Weapon
     private float reloadTimer;
     private float fireCooldown;
     private bool isReloading;
-
-    //private Vector3 targetPoint;
     private Vector3 shootDirection;
 
     [SerializeField] private Transform playerBody;
@@ -39,14 +37,12 @@ public class Pistol : Weapon
     [SerializeField] private List<GraphicRaycaster> uiRaycasters = new();
     [SerializeField] private EventSystem eventSystem;
 
-
-    //Dictionary
-    private readonly Dictionary<int, bool> touchStartedOverUI = new();
+    // For PC input
+    private bool isMouseOverUI = false;
 
     protected override void Awake()
     {
         base.Awake();
-        
 
         if (weaponData == null)
         {
@@ -54,8 +50,6 @@ public class Pistol : Weapon
             return;
         }
         currentAmmo = weaponData.maxAmmo;
-        //Debug.Log($"Weapon Type: {WeaponType}");
-
         littleTimer = littleTimerMax;
     }
 
@@ -86,66 +80,67 @@ public class Pistol : Weapon
             }
         }
 
-        // Check for touch input on mobile
-        for (int i = 0; i < Input.touchCount; i++)
-        {
-            Touch touch = Input.GetTouch(i);
-            int fingerId = touch.fingerId;
-
-            if (touch.phase == TouchPhase.Began)
-            {
-                bool isOverUI = IsTouchOverUI(touch.position);
-                touchStartedOverUI[fingerId] = isOverUI;
-            }
-            else if (touch.phase is TouchPhase.Stationary or TouchPhase.Moved)
-            {
-                if (touchStartedOverUI.TryGetValue(fingerId, out bool startedOverUI) && !startedOverUI && deadEye.canShoot == true)
-                {
-                    player?.SetShooting(true); // ✅ START shooting flag
-                    ShootAtTouch(touch.position);
-                }
-            }
-            else if (touch.phase is TouchPhase.Ended or TouchPhase.Canceled)
-            {
-                touchStartedOverUI.Remove(fingerId);
-                player?.SetShooting(false); // ✅ END shooting flag
-            }
-        }
+        // Check for mouse input on PC
+        CheckMouseInput();
 
         if (littleTimer > 0)
         {
             littleTimer -= Time.deltaTime;
-        } else
+        }
+        else
         {
             rig.weight = 0;
         }
     }
 
-    private void ShootAtTouch(Vector2 screenPosition)
+    private void CheckMouseInput()
+    {
+        // Check if mouse is over UI
+        isMouseOverUI = IsMouseOverUI();
+
+        // Handle left mouse button for shooting
+        if (Input.GetMouseButtonDown(0) && !isMouseOverUI && deadEye.canShoot)
+        {
+            player?.SetShooting(true);
+        }
+
+        if (Input.GetMouseButton(0) && !isMouseOverUI && deadEye.canShoot)
+        {
+            ShootAtMousePosition(Input.mousePosition);
+        }
+
+        if (Input.GetMouseButtonUp(0))
+        {
+            player?.SetShooting(false);
+        }
+    }
+
+    private void ShootAtMousePosition(Vector2 screenPosition)
     {
         if (isReloading || currentAmmo <= 0 || fireCooldown > 0f)
         {
             return;
         }
-       
+
         Ray ray = Camera.main.ScreenPointToRay(screenPosition);
 
         Vector3 targetPoint = Physics.Raycast(ray, out RaycastHit hit) ? hit.point : ray.origin + (ray.direction * 100f);
         Spher.position = targetPoint;
         rig.weight = 1;
         littleTimer = littleTimerMax;
+
         Vector3 lookDirection = targetPoint - playerBody.position;
-        lookDirection.y = 0f; // Keep only horizontal rotation
+        lookDirection.y = 0f;
         Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
         playerBody.rotation = targetRotation;
+
         Shoot(targetPoint);
-       // rig.weight = 0;
     }
-    Vector3 targetForAnimations;
-    private bool IsTouchOverUI(Vector2 screenPosition)
+
+    private bool IsMouseOverUI()
     {
         PointerEventData eventData = new PointerEventData(eventSystem);
-        eventData.position = screenPosition;
+        eventData.position = Input.mousePosition;
 
         foreach (var raycaster in uiRaycasters)
         {
@@ -159,124 +154,75 @@ public class Pistol : Weapon
 
         return false;
     }
+
+    // ... rest of the Pistol class remains the same ...
     public override void ShootFromAnimation()
     {
         base.ShootFromAnimation();
-        //if (currentAmmo <= 0 || isReloading) return;
-
         StartCoroutine(WaitAndShootWhenIKReady(targetForAnimations));
     }
-    public override void Shoot(Vector3 targetPoint) // add parameter the target you want to shoot
+
+    Vector3 targetForAnimations;
+
+    public override void Shoot(Vector3 targetPoint)
     {
-        //if (ikHandler != null)
-        //{
-        //    ikHandler.TriggerShootIK();
-        //}
         targetForAnimations = targetPoint;
-        animator.SetBool("shoot" , true);
-        
-        //StartCoroutine(WaitAndShootWhenIKReady(targetPoint));
-        deadEyeBool = false;
-        //player.gameObject.GetComponent<Animator>().ResetTrigger("Shoot");
-        //if (isReloading || currentAmmo <= 0 || fireCooldown > 0f)
-        //    return;
-
-        //fireCooldown = weaponData.fireRate;
-        //currentAmmo--;
-
-        //GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-        //Rigidbody rb = bullet.GetComponent<Rigidbody>();
-        //rb.AddForce(bullet.transform.forward * weaponData.bulletForce, ForceMode.Impulse);
-
-        //Bullet bulletScript = bullet.GetComponent<Bullet>();
-        //if (bulletScript != null)
-        //    bulletScript.SetDamage(weaponData.damage);
-
-        //if (muzzleFlash != null)
-        //    muzzleFlash.Play();
-
-        //if (audioSource && shootSound)
-        //    audioSource.PlayOneShot(shootSound);
+        animator.SetBool("shoot", true);
     }
+
     public void waitAndShoot()
     {
         StartCoroutine(WaitAndShootWhenIKReady(targetForAnimations));
     }
+
     private IEnumerator WaitAndShootWhenIKReady(Vector3 targetPoint)
     {
-
-        // Wait until IK weight is close to 1
-        //while (ikHandler.rig.weight < 0.8f)
-        //{
-        //    yield return null; // wait for next frame
-        //}
-
-        // moved these here - to get the final firePoint calculations after doing the ik
         shootDirection = (targetPoint - firePoint.position).normalized;
         firePoint.rotation = Quaternion.LookRotation(shootDirection);
 
-        // Only shoot if allowed
         if (isReloading && fireCooldown > 0f)
         {
             yield break;
         }
+
         if (!deadEyeBool)
         {
             fireCooldown = weaponData.fireRate;
-
         }
+
         currentAmmo--;
-        if(WeaponType == WeaponType.Auto)
+
+        if (WeaponType == WeaponType.Auto)
         {
             GameObject Laser = PoolManager.Instance.GetPrefabByTag(PoolType.Laser);
             Laser.GetComponent<Laser>().InitializeLaser(firePoint.transform.position, firePoint.transform.rotation, true);
             Laser.GetComponent<Laser>().SetLaserDamage(weaponData.damage);
             AudioManager.Instance.PlaySound(SoundType.Laser);
-            //Laser.transform.position = firePoint.transform.position;
-            //Laser.transform.rotation = firePoint.transform.rotation;
-            //Laser.SetActive(true);
 
             Rigidbody rb = Laser.GetComponent<Rigidbody>();
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
             rb.AddForce(Laser.transform.forward * weaponData.bulletForce, ForceMode.Impulse);
-            //To Do
-            //Laser bulletScript = Laser.GetComponent<Laser>();
-            //if (bulletScript != null)
-            //{
-            //    // Get damage from weapon data and upgrades
-            //    float baseDamage = weaponData.damage;
-            //    var upgradeState = PlayerInventoryHolder.instance.Inventory.GetUpgradeState(weaponData.weaponType);
-            //    float damageMultiplier = 1f + (upgradeState?.GetLevel(UpgradableStatType.Damage) ?? 0) * 0.1f; // 10% per level
-            //    bulletScript.SetDamage(baseDamage * damageMultiplier);
-            //}
         }
         else
         {
-            GameObject bullet = /*Instantiate(bulletPrefab , firePoint.position , Quaternion.identity);*/PoolManager.Instance.GetPrefabByTag(PoolType.Bullet);
+            GameObject bullet = PoolManager.Instance.GetPrefabByTag(PoolType.Bullet);
             bullet.transform.position = firePoint.position;
-            bullet.transform.rotation = Quaternion.LookRotation(shootDirection); // make sure it's updated
+            bullet.transform.rotation = Quaternion.LookRotation(shootDirection);
             bullet.SetActive(true);
             AudioManager.Instance.PlaySound(SoundType.Gun);
 
             Rigidbody rb = bullet.GetComponent<Rigidbody>();
-
-            // reset liner and angular velocity to make the bullet hit right
-            rb.linearVelocity = Vector3.zero; // reset!
+            rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
-
             rb.AddForce(bullet.transform.forward * weaponData.bulletForce, ForceMode.Impulse);
 
             Bullet bulletScript = bullet.GetComponent<Bullet>();
             if (bulletScript != null)
             {
-                //to change to the data in inventory 
-                bulletScript.SetDamage(5/*weaponData.damage*/);
-
+                bulletScript.SetDamage(5);
             }
         }
-        
-        // bulletScript.SetDamage(weaponData.damage);
 
         if (muzzleFlash != null)
         {
@@ -287,105 +233,26 @@ public class Pistol : Weapon
         {
             audioSource.PlayOneShot(shootSound);
         }
+
         animator.SetBool("shoot", false);
-        //rig.weight = 0;
     }
 
-
-    public void ShootTargets(List<Transform> targets)
+    public override IEnumerator ShootForDeadEye(Vector3 targetPosition)
     {
-        StartCoroutine(ShootTargetsSequentially(targets));
-        //if (ikHandler != null)
-        //{
-        //    ikHandler.TriggerShootIK();
-        //    //_ = StartCoroutine(WaitAndShootWhenIKReady(targetPoint));
-        //}
+        if (WeaponType == WeaponType.Auto)
+        {
+            shootDirection = (targetPosition - firePoint.position).normalized;
+            firePoint.rotation = Quaternion.LookRotation(shootDirection);
+            deadEyeBool = true;
+            Shoot(targetPosition);
+        }
+        else
+        {
+            deadEyeBool = true;
+            Shoot(targetPosition);
+            yield return new WaitForSecondsRealtime(1f);
+        }
     }
-
-
-    private IEnumerator ShootTargetsSequentially(List<Transform> targets)
-    {
-        //while (ikHandler.rig.weight < 0.8f)
-        //{
-        //    yield return null; // wait for next frame
-        //}
-
-        deadEye.canShoot = false;
-        currentAmmo = weaponData.maxAmmo;
-
-
-        //Invoke("etfo", targets, weaponData.fireRate);
-
-
-        deadEye.canShoot = true;
-        currentAmmo = weaponData.maxAmmo;
-
-        yield return null;
-    }
-
-    //private IEnumerator nady3laetfo(List<Transform> targets)
-    //{
-    //    yield return new WaitForSeconds(weaponData.fireRate);
-
-    //    Debug.Log($"fire rate = {weaponData.fireRate}");
-
-    //    if (targets.Count > 0)
-    //    {
-    //        etfo(targets);
-    //    }
-    //}
-
-    //private void etfo(List<Transform> targets)
-    //{
-    //    shootDirection = (targets[targets.Count - 1].position - firePoint.position).normalized;
-    //    firePoint.rotation = Quaternion.LookRotation(shootDirection);
-
-
-    //    GameObject bullet = PoolManager.Instance.GetPrefabByTag(PoolType.Bullet);
-
-    //    Debug.Log($"bullet is {(bullet == null ? "NULL" : "OK")}.");
-
-    //    bullet.transform.position = firePoint.position;
-    //    bullet.transform.rotation = Quaternion.LookRotation(shootDirection); // make sure it's updated
-    //    bullet.SetActive(true);
-
-    //    Rigidbody rb = bullet.GetComponent<Rigidbody>();
-
-    //    // reset liner and angular velocity to make the bullet hit right
-    //    rb.linearVelocity = Vector3.zero;
-    //    rb.angularVelocity = Vector3.zero;
-
-    //    rb.AddForce(bullet.transform.forward * weaponData.bulletForce, ForceMode.Impulse);
-
-    //    Bullet bulletScript = bullet.GetComponent<Bullet>();
-    //    if (bulletScript != null)
-    //    {
-    //        //to change to the data in inventory 
-    //        bulletScript.SetDamage(-1/*weaponData.damage*/);
-    //        // bulletScript.SetDamage(weaponData.damage);
-    //    }
-
-    //    if (muzzleFlash != null)
-    //    {
-    //        muzzleFlash.Play();
-    //    }
-
-    //    if (audioSource && shootSound)
-    //    {
-    //        audioSource.PlayOneShot(shootSound);
-    //    }
-
-    //    targets.Remove(targets[targets.Count - 1]);
-
-    //    if (targets.Count > 0)
-    //    {
-    //        Debug.Log("double etfo");
-    //        StartCoroutine(nady3laetfo(targets));
-    //    }
-
-    //    Debug.Log($"targets count {targets.Count}");
-    //}
-
 
     public override void Reload()
     {
@@ -400,50 +267,4 @@ public class Pistol : Weapon
             }
         }
     }
-    public override IEnumerator ShootForDeadEye(Vector3 targetPosition)
-    {
-        if (WeaponType == WeaponType.Auto)
-        {
-            shootDirection = (targetPosition - firePoint.position).normalized;
-            firePoint.rotation = Quaternion.LookRotation(shootDirection);
-            deadEyeBool = true;
-            // Shoot
-            Shoot(targetPosition);
-
-            // Longer delay than normal firing rate for DeadEye
-            //yield return new WaitForSecondsRealtime(0.25f);
-        }
-        else
-        {
-            // Skip IK wait if IKHandler is missing
-            //if (ikHandler == null)
-            //{
-            //    Shoot(targetPosition);
-            //    yield break;
-            //}
-
-            //Trigger IK aiming
-            //ikHandler.TriggerShootIK();
-            //shootDirection = (targetPosition - firePoint.position).normalized;
-            //firePoint.rotation = Quaternion.LookRotation(shootDirection);
-
-            float maxWaitTime = 0.5f;
-            float timer = 0f;
-
-            //while (ikHandler.rig.weight < 0.8f && timer < maxWaitTime)
-            //{
-            //    timer += Time.unscaledDeltaTime;
-            //    yield return null;
-            //}
-
-            // Proceed with shooting even if IK isn't perfectly aligned
-            deadEyeBool = true;
-            Shoot(targetPosition);
-
-            // Small delay between shots (adjust as needed)
-            yield return new WaitForSecondsRealtime(1f); // should be changed to the firerate of the weapon 
-
-        }
-    }
-    
 }

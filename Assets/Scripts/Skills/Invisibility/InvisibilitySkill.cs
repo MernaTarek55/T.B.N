@@ -18,9 +18,13 @@ public class InvisibilitySkill : MonoBehaviour
     public bool isInvisible = false;
     private bool isOnCooldown = false;
 
-    public Button InvisibleButton;
+    //public Button InvisibleButton;
 
-    [SerializeField] private Image invisibilityImage; // Image fill UI
+    //[SerializeField] private Image invisibilityImage; // Image fill UI
+
+    // Add input cooldown to prevent rapid key presses
+    private float keyPressCooldown = 0.5f;
+    private float lastKeyPressTime = 0f;
 
     private void Awake()
     {
@@ -49,6 +53,16 @@ public class InvisibilitySkill : MonoBehaviour
         UpdateStatsFromInventory();
     }
 
+    private void Update()
+    {
+        // Handle E key press for invisibility
+        if (Input.GetKeyDown(KeyCode.E) && Time.time - lastKeyPressTime > keyPressCooldown)
+        {
+            lastKeyPressTime = Time.time;
+            UseInvisibility();
+        }
+    }
+
     public void UpdateStatsFromInventory()
     {
         cooldownDuration = playerInventory.getPlayerStat(PlayerSkillsStats.InvisibilityCoolDown);
@@ -61,8 +75,8 @@ public class InvisibilitySkill : MonoBehaviour
     {
         if (!isInvisible && !isOnCooldown)
         {
-            InvisibleButton.interactable = false;
-            _ = StartCoroutine(BecomeInvisible());
+            //InvisibleButton.interactable = false;
+            StartCoroutine(BecomeInvisible());
         }
     }
 
@@ -78,22 +92,22 @@ public class InvisibilitySkill : MonoBehaviour
         yield return Fade(1f, 0f);
 
         isInvisible = false;
-        _ = StartCoroutine(Cooldown());
+        StartCoroutine(Cooldown());
     }
 
     private IEnumerator UpdateInvisibilityFill()
     {
         float timeRemaining = invisibilityDuration;
-        invisibilityImage.fillAmount = 1f;
+        //invisibilityImage.fillAmount = 1f;
 
         while (timeRemaining > 0f)
         {
             timeRemaining -= Time.deltaTime;
-            invisibilityImage.fillAmount = timeRemaining / invisibilityDuration;
+            //invisibilityImage.fillAmount = timeRemaining / invisibilityDuration;
             yield return null;
         }
 
-        invisibilityImage.fillAmount = 0f;
+        //invisibilityImage.fillAmount = 0f;
     }
 
     private IEnumerator Fade(float from, float to)
@@ -114,6 +128,7 @@ public class InvisibilitySkill : MonoBehaviour
             yield return null;
         }
     }
+
     public void ResetInvisibilityOnDeath()
     {
         StopAllCoroutines();
@@ -123,11 +138,11 @@ public class InvisibilitySkill : MonoBehaviour
         // Start smooth fade back to visible
         StartCoroutine(Fade(1f, 0f));
 
-        if (InvisibleButton != null)
-            InvisibleButton.interactable = true;
+        //if (InvisibleButton != null)
+        //    InvisibleButton.interactable = true;
 
-        if (invisibilityImage != null)
-            invisibilityImage.fillAmount = 1f;
+        //if (invisibilityImage != null)
+        //    invisibilityImage.fillAmount = 1f;
     }
 
     private IEnumerator Cooldown()
@@ -137,26 +152,19 @@ public class InvisibilitySkill : MonoBehaviour
         float cooldownRemaining = cooldownDuration;
 
         // Start cooldown visual (image starts empty)
-        invisibilityImage.fillAmount = 0f;
+       // invisibilityImage.fillAmount = 0f;
 
         // Visual fill only (separate from the button)
         while (cooldownRemaining > 0f)
         {
             cooldownRemaining -= Time.deltaTime;
-
-            // to make the button fill back again at the cooldown time
-            //invisibilityImage.fillAmount = 1f - (cooldownRemaining / cooldownDuration); 
-
             yield return null;
         }
 
-        invisibilityImage.fillAmount = 1f;
-
+        //invisibilityImage.fillAmount = 1f;
         isOnCooldown = false;
 
         // Enable button again
-        InvisibleButton.interactable = true;
+       // InvisibleButton.interactable = true;
     }
-
-
 }
