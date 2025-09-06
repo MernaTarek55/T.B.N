@@ -8761,17 +8761,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5040033301241958776, guid: 1b2485b8565a844419b7e71d10bff44c, type: 3}
   m_PrefabInstance: {fileID: 157056936}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &604926669 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4466593539436332948, guid: 5c5123ef39fcb274ca9304768652842c, type: 3}
-  m_PrefabInstance: {fileID: 808296033}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1879886803}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &607668683
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12509,7 +12498,7 @@ PrefabInstance:
     - target: {fileID: 4691776738279339158, guid: 5c5123ef39fcb274ca9304768652842c, type: 3}
       propertyPath: DeadEyeBtn
       value: 
-      objectReference: {fileID: 1879886803}
+      objectReference: {fileID: 0}
     - target: {fileID: 4691776738279339158, guid: 5c5123ef39fcb274ca9304768652842c, type: 3}
       propertyPath: weaponSwitch
       value: 
@@ -12654,11 +12643,6 @@ PrefabInstance:
 --- !u!1 &808296034 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7252776371748360924, guid: 5c5123ef39fcb274ca9304768652842c, type: 3}
-  m_PrefabInstance: {fileID: 808296033}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &808296035 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6032638776265725325, guid: 5c5123ef39fcb274ca9304768652842c, type: 3}
   m_PrefabInstance: {fileID: 808296033}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &808296049 stripped
@@ -52965,11 +52949,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1877138143}
   m_CullTransparentMesh: 1
---- !u!1 &1879886803 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3917674638984152438, guid: 5c5123ef39fcb274ca9304768652842c, type: 3}
-  m_PrefabInstance: {fileID: 808296033}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1886083391
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -57669,6 +57648,10 @@ PrefabInstance:
       propertyPath: transforrm
       value: 
       objectReference: {fileID: 808296049}
+    - target: {fileID: 3001859420966010909, guid: 9cd19053e9314db4cae9d3c970ca1882, type: 3}
+      propertyPath: pools.Array.data[2].prefab
+      value: 
+      objectReference: {fileID: 4876149916586524456, guid: 8d4e9e2f44902a248b127887f8f206b9, type: 3}
     - target: {fileID: 4731995943281126076, guid: 9cd19053e9314db4cae9d3c970ca1882, type: 3}
       propertyPath: m_LocalPosition.x
       value: 8.875962
@@ -57720,11 +57703,11 @@ PrefabInstance:
     - target: {fileID: 5108506131203386446, guid: 9cd19053e9314db4cae9d3c970ca1882, type: 3}
       propertyPath: SwitchBTN
       value: 
-      objectReference: {fileID: 808296035}
+      objectReference: {fileID: 0}
     - target: {fileID: 5108506131203386446, guid: 9cd19053e9314db4cae9d3c970ca1882, type: 3}
       propertyPath: deadeyeButton
       value: 
-      objectReference: {fileID: 604926669}
+      objectReference: {fileID: 0}
     - target: {fileID: 5108506131203386446, guid: 9cd19053e9314db4cae9d3c970ca1882, type: 3}
       propertyPath: 'weapons.Array.data[0]'
       value: 
@@ -57813,7 +57796,7 @@ PrefabInstance:
     - target: {fileID: 7061077541305769603, guid: bf532f0863969204f9e0c42512c24094, type: 3}
       propertyPath: m_SceneBindings.Array.data[2].value
       value: 
-      objectReference: {fileID: 1879886803}
+      objectReference: {fileID: 0}
     - target: {fileID: 7061077541305769603, guid: bf532f0863969204f9e0c42512c24094, type: 3}
       propertyPath: m_SceneBindings.Array.data[3].value
       value: 

@@ -55,7 +55,7 @@ public class LavaProjectile : MonoBehaviour
         }
         else
         {
-            Debug.LogError("LavaProjectile: Failed to initialize - missing references!");
+            Debug.Log("LavaProjectile: Failed to initialize - missing references!");
             ReturnToPool();
         }
     }
